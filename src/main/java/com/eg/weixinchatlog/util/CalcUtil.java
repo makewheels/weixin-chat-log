@@ -1,6 +1,5 @@
 package com.eg.weixinchatlog.util;
 
-import com.eg.weixinchatlog.util.Constants;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.dom4j.Document;
 import org.dom4j.DocumentException;
