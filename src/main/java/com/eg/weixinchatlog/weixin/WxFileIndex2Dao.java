@@ -39,7 +39,7 @@ public class WxFileIndex2Dao {
      * @param msgId
      * @return
      */
-    public List<WxFileIndex2> getAllWeixinFileByMsgId(long msgId) {
+    public List<WxFileIndex2> getAllWxFileIndex2ByMsgId(long msgId) {
         try {
             PreparedStatement preparedStatement = connection.prepareStatement("select * from WxFileIndex2 where msgId=?");
             preparedStatement.setLong(1, msgId);

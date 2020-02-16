@@ -1,15 +1,14 @@
 package com.eg.weixinchatlog.run;
 
-import com.eg.weixinchatlog.util.MessageType;
-import com.eg.weixinchatlog.weixin.EnMicroMsgDao;
 import com.eg.weixinchatlog.util.CalcUtil;
 import com.eg.weixinchatlog.util.Constants;
+import com.eg.weixinchatlog.util.MessageType;
+import com.eg.weixinchatlog.weixin.EnMicroMsgDao;
 import com.eg.weixinchatlog.weixin.WeixinService;
 import com.eg.weixinchatlog.weixin.WeixinUser;
 import com.eg.weixinchatlog.weixin.WxFileIndex2Dao;
 import com.eg.weixinchatlog.weixin.bean.enmicromsg.Message;
 import com.eg.weixinchatlog.weixin.bean.enmicromsg.Rcontact;
-import com.eg.weixinchatlog.weixin.bean.wxfileindex.WxFileIndex2;
 import lombok.Data;
 
 import java.io.File;
@@ -25,6 +24,37 @@ public class Start {
     private List<WeixinUser> weixinUserList = new ArrayList<>();
 
     /**
+     * 设置EnMicroMsg.db文件
+     *
+     * @param weixinUser
+     */
+    private void initEnMicroMsgDb(WeixinUser weixinUser) {
+        File enMicroMsg_decrypt_db_file = new File(Constants.DATA_PATH + "/MicroMsg/"
+                + weixinUser.getMmuinMd5() + "/EnMicroMsg-decrypt.db");
+        EnMicroMsgDao enMicroMsgDao = new EnMicroMsgDao();
+        enMicroMsgDao.setWeixinUser(weixinUser);
+        enMicroMsgDao.setDbFile(enMicroMsg_decrypt_db_file);
+        enMicroMsgDao.initConnection();
+        weixinUser.getWeixinService().setEnMicroMsgDao(enMicroMsgDao);
+    }
+
+    /**
+     * 设置WxFileIndex.db文件
+     *
+     * @param weixinUser
+     */
+    private void initWxFileIndexDb(WeixinUser weixinUser) {
+        File wxFileIndex_decrypt_db_file = new File(Constants.DATA_PATH + "/MicroMsg/"
+                + weixinUser.getMmuinMd5() + "/WxFileIndex-decrypt.db");
+        WxFileIndex2Dao wxFileIndex2Dao = new WxFileIndex2Dao();
+        wxFileIndex2Dao.setWeixinUser(weixinUser);
+        wxFileIndex2Dao.setDbFile(wxFileIndex_decrypt_db_file);
+        wxFileIndex2Dao.initConnection();
+        weixinUser.setWxFileIndexDao(wxFileIndex2Dao);
+        weixinUser.getWeixinService().setWxFileIndex2Dao(wxFileIndex2Dao);
+    }
+
+    /**
      * 初始化微信用户列表
      */
     private void initWeixinUserList() {
@@ -38,28 +68,13 @@ public class Start {
             weixinUser.setMmuinMd5(mmUinMd5);
             weixinUser.setSqlitePassword(CalcUtil.getSqlitePassword(uin));
             weixinUser.setMmFolder(new File(Constants.DATA_PATH + "/MicroMsg/" + mmUinMd5));
-            //设置EnMicroMsg.db文件
-            File enMicroMsg_decrypt_db_file = new File(Constants.DATA_PATH + "/MicroMsg/"
-                    + mmUinMd5 + "/EnMicroMsg-decrypt.db");
-            EnMicroMsgDao enMicroMsgDao = new EnMicroMsgDao();
-            enMicroMsgDao.setWeixinUser(weixinUser);
-            enMicroMsgDao.setDbFile(enMicroMsg_decrypt_db_file);
-            enMicroMsgDao.initConnection();
-            weixinUser.setEnMicroMsgDao(enMicroMsgDao);
-            //设置WxFileIndex.db文件
-            File wxFileIndex_decrypt_db_file = new File(Constants.DATA_PATH + "/MicroMsg/"
-                    + mmUinMd5 + "/WxFileIndex-decrypt.db");
-            WxFileIndex2Dao wxFileIndex2Dao = new WxFileIndex2Dao();
-            wxFileIndex2Dao.setWeixinUser(weixinUser);
-            wxFileIndex2Dao.setDbFile(wxFileIndex_decrypt_db_file);
-            wxFileIndex2Dao.initConnection();
-            weixinUser.setWxFileIndexDao(wxFileIndex2Dao);
             //初始化service
             WeixinService weixinService = new WeixinService();
             weixinService.setWeixinUser(weixinUser);
-            weixinService.setEnMicroMsgDao(enMicroMsgDao);
-            weixinService.setWxFileIndex2Dao(wxFileIndex2Dao);
             weixinUser.setWeixinService(weixinService);
+            //初始化db文件
+            initEnMicroMsgDb(weixinUser);
+            initWxFileIndexDb(weixinUser);
             weixinUserList.add(weixinUser);
         }
     }
@@ -76,14 +91,15 @@ public class Start {
             List<Rcontact> friendList = weixinUser.getFriendList();
             //遍历每一个联系人
             for (Rcontact friend : friendList) {
+                WeixinService service = weixinUser.getWeixinService();
                 //在message表中查出消息
                 String username = friend.getUsername();
-                long messageCount = weixinUser.getWeixinService().getMessageCountByTalker(username);
+                long messageCount = service.getMessageCountByTalker(username);
                 if (messageCount == 0)
                     continue;
                 System.out.println(username);
                 System.out.println(messageCount);
-                List<Message> messageList = weixinUser.getWeixinService().getAllMessageByTalker(username);
+                List<Message> messageList = service.getAllMessageByTalker(username);
                 //遍历每一条消息
                 for (Message message : messageList) {
                     long msgId = message.getMsgId();
@@ -92,20 +108,22 @@ public class Start {
                     if (type == MessageType.TEXT) {
                         System.out.println(message.getContent());
                     } else if (type == MessageType.IMAGE) {
-                        WxFileIndex2 wxfile = weixinUser.getWeixinService().getMaxSizeWeixinFileByMsgId(msgId);
-                        String path = wxfile.getPath();
-                        File file = new File(Constants.RESOURCE_PATH + "/" + path);
-                        System.out.println(file.lastModified());
+                        File file = service.getMaxSizeLocalFileByMsgId(msgId);
+                        if (file.exists()) {
+                            System.out.println(file.getAbsolutePath());
+                        } else {
+                            System.err.println("not exist");
+                        }
                     } else if (type == MessageType.VOICE) {
-                        WxFileIndex2 wxfile = weixinUser.getWeixinService().getMaxSizeWeixinFileByMsgId(msgId);
-                        String path = wxfile.getPath();
-                        File file = new File(Constants.RESOURCE_PATH + "/" + path);
-                        System.out.println(file.lastModified());
+                        File file = service.getMaxSizeLocalFileByMsgId(msgId);
+                        if (file.exists()) {
+                            System.out.println(file.getAbsolutePath());
+                        }
                     } else if ((type == MessageType.VIDEO)) {
-                        WxFileIndex2 wxfile = weixinUser.getWeixinService().getMaxSizeWeixinFileByMsgId(msgId);
-                        String path = wxfile.getPath();
-                        File file = new File(Constants.RESOURCE_PATH + "/" + path);
-                        System.out.println(file.lastModified());
+                        File file = service.getMaxSizeLocalFileByMsgId(msgId);
+                        if (file.exists()) {
+                            System.out.println(file.getAbsolutePath());
+                        }
                     } else if ((type == MessageType.SYSTEM)) {
                         System.out.println(message.getContent());
                     }

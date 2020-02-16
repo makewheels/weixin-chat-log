@@ -1,11 +1,14 @@
 package com.eg.weixinchatlog.weixin;
 
+import com.eg.weixinchatlog.util.Constants;
 import com.eg.weixinchatlog.weixin.bean.enmicromsg.Message;
 import com.eg.weixinchatlog.weixin.bean.enmicromsg.Rcontact;
 import com.eg.weixinchatlog.weixin.bean.wxfileindex.WxFileIndex2;
 import lombok.Data;
 import org.apache.commons.lang3.StringUtils;
 
+import java.io.Console;
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -83,8 +86,8 @@ public class WeixinService {
      * @param msgId
      * @return
      */
-    public List<WxFileIndex2> getAllWeixinFileByMsgId(long msgId) {
-        return wxFileIndex2Dao.getAllWeixinFileByMsgId(msgId);
+    private List<WxFileIndex2> getAllWxFileIndex2ByMsgId(long msgId) {
+        return wxFileIndex2Dao.getAllWxFileIndex2ByMsgId(msgId);
     }
 
     /**
@@ -93,21 +96,33 @@ public class WeixinService {
      * @param msgId
      * @return
      */
-    public WxFileIndex2 getMaxSizeWeixinFileByMsgId(long msgId) {
-        List<WxFileIndex2> wxFileIndex2List = wxFileIndex2Dao.getAllWeixinFileByMsgId(msgId);
+    public WxFileIndex2 getMaxSizeWxFileIndex2ByMsgId(long msgId) {
+        List<WxFileIndex2> wxFileIndex2List = wxFileIndex2Dao.getAllWxFileIndex2ByMsgId(msgId);
         if (wxFileIndex2List.size() == 1) {
             return wxFileIndex2List.get(0);
         }
         int maxIndex = 0;
-        long size = wxFileIndex2List.get(0).getSize();
+        long maxSize = wxFileIndex2List.get(0).getSize();
         for (int i = 1; i < wxFileIndex2List.size(); i++) {
             WxFileIndex2 wxFileIndex2 = wxFileIndex2List.get(i);
             long eachSize = wxFileIndex2.getSize();
-            if (eachSize > size) {
-                size = eachSize;
+            if (eachSize > maxSize) {
+                maxSize = eachSize;
                 maxIndex = i;
             }
         }
         return wxFileIndex2List.get(maxIndex);
+    }
+
+    /**
+     * 通过msgId找，size最大文件，直接返回本地文件File对象
+     *
+     * @param msgId
+     * @return
+     */
+    public File getMaxSizeLocalFileByMsgId(long msgId) {
+        //TODO 这里应该考虑，如果本地文件不存在怎么办？
+        WxFileIndex2 wxFileIndex2 = getMaxSizeWxFileIndex2ByMsgId(msgId);
+        return new File(Constants.RESOURCE_PATH + "/" + wxFileIndex2.getPath());
     }
 }
