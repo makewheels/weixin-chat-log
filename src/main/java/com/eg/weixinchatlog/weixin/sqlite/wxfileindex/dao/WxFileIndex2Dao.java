@@ -1,7 +1,8 @@
-package com.eg.weixinchatlog.weixin.dao;
+package com.eg.weixinchatlog.weixin.sqlite.wxfileindex.dao;
 
 import com.eg.weixinchatlog.weixin.WeixinUser;
-import com.eg.weixinchatlog.weixin.bean.wxfileindex.WxFileIndex2;
+import com.eg.weixinchatlog.weixin.sqlite.enmicromsg.ImgFlag;
+import com.eg.weixinchatlog.weixin.sqlite.wxfileindex.WxFileIndex2;
 import lombok.Data;
 
 import java.io.File;
@@ -14,7 +15,6 @@ import java.util.List;
  */
 @Data
 public class WxFileIndex2Dao {
-    private WeixinUser weixinUser;
     private Connection connection;
     private File dbFile;
 
@@ -63,4 +63,5 @@ public class WxFileIndex2Dao {
         }
         return null;
     }
+
 }

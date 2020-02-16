@@ -1,5 +1,9 @@
 package com.eg.weixinchatlog.util;
 
+import com.eg.weixinchatlog.weixin.WeixinService;
+import com.eg.weixinchatlog.weixin.WeixinUser;
+import com.eg.weixinchatlog.weixin.sqlite.enmicromsg.dao.EnMicroMsgDao;
+import com.eg.weixinchatlog.weixin.sqlite.wxfileindex.dao.WxFileIndex2Dao;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.dom4j.Document;
 import org.dom4j.DocumentException;
@@ -13,7 +17,9 @@ import java.util.List;
 /**
  * @time 2020-02-15 16:09
  */
-public class CalcUtil {
+public class WeixinUtil {
+    private WeixinService weixinService = new WeixinService();
+
     public static List<String> getUinList() {
         Document document = null;
         try {

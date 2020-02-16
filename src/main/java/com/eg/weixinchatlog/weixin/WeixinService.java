@@ -1,11 +1,13 @@
 package com.eg.weixinchatlog.weixin;
 
 import com.eg.weixinchatlog.util.Constants;
-import com.eg.weixinchatlog.weixin.bean.enmicromsg.Message;
-import com.eg.weixinchatlog.weixin.bean.enmicromsg.Rcontact;
-import com.eg.weixinchatlog.weixin.bean.wxfileindex.WxFileIndex2;
-import com.eg.weixinchatlog.weixin.dao.EnMicroMsgDao;
-import com.eg.weixinchatlog.weixin.dao.WxFileIndex2Dao;
+import com.eg.weixinchatlog.util.WeixinUtil;
+import com.eg.weixinchatlog.weixin.sqlite.enmicromsg.ImgFlag;
+import com.eg.weixinchatlog.weixin.sqlite.enmicromsg.Message;
+import com.eg.weixinchatlog.weixin.sqlite.enmicromsg.Rcontact;
+import com.eg.weixinchatlog.weixin.sqlite.wxfileindex.WxFileIndex2;
+import com.eg.weixinchatlog.weixin.sqlite.enmicromsg.dao.EnMicroMsgDao;
+import com.eg.weixinchatlog.weixin.sqlite.wxfileindex.dao.WxFileIndex2Dao;
 import lombok.Data;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -19,41 +21,111 @@ import java.util.List;
  */
 @Data
 public class WeixinService {
-    private WeixinUser weixinUser;
     private EnMicroMsgDao enMicroMsgDao;
     private WxFileIndex2Dao wxFileIndex2Dao;
 
     /**
-     * 初始化联系人列表
+     * 初始化微信用户列表
      */
-    public void initRcontactList() {
+    public List<WeixinUser> initWeixinUserList() {
+        List<WeixinUser> weixinUserList = new ArrayList<>();
+        //拿到uin列表
+        List<String> uinList = WeixinUtil.getUinList();
+        //遍历每一个uin
+        for (String uin : uinList) {
+            WeixinUser weixinUser = new WeixinUser();
+            weixinUser.setUin(uin);
+            String mmUinMd5 = WeixinUtil.getMmUinMd5(uin);
+            weixinUser.setMmUinMd5(mmUinMd5);
+            weixinUser.setSqlitePassword(WeixinUtil.getSqlitePassword(uin));
+            weixinUser.setMmFolder(new File(Constants.DATA_PATH + "/MicroMsg/" + mmUinMd5));
+            //初始化service
+            WeixinService weixinService = new WeixinService();
+            weixinUser.setWeixinService(weixinService);
+            //初始化db文件
+            initEnMicroMsgDb(weixinUser);
+            initWxFileIndexDb(weixinUser);
+            weixinUserList.add(weixinUser);
+        }
+        return weixinUserList;
+    }
+
+    /**
+     * 初始化EnMicroMsg.db文件
+     *
+     * @param weixinUser
+     */
+    public void initEnMicroMsgDb(WeixinUser weixinUser) {
+        File enMicroMsg_decrypt_db_file = new File(Constants.DATA_PATH + "/MicroMsg/"
+                + weixinUser.getMmUinMd5() + "/EnMicroMsg-decrypt.db");
+        EnMicroMsgDao enMicroMsgDao = new EnMicroMsgDao();
+        enMicroMsgDao.setDbFile(enMicroMsg_decrypt_db_file);
+        enMicroMsgDao.initConnection();
+        weixinUser.getWeixinService().setEnMicroMsgDao(enMicroMsgDao);
+    }
+
+    /**
+     * 初始化WxFileIndex.db文件
+     *
+     * @param weixinUser
+     */
+    public void initWxFileIndexDb(WeixinUser weixinUser) {
+        File wxFileIndex_decrypt_db_file = new File(Constants.DATA_PATH + "/MicroMsg/"
+                + weixinUser.getMmUinMd5() + "/WxFileIndex-decrypt.db");
+        WxFileIndex2Dao wxFileIndex2Dao = new WxFileIndex2Dao();
+        wxFileIndex2Dao.setDbFile(wxFileIndex_decrypt_db_file);
+        wxFileIndex2Dao.initConnection();
+        weixinUser.getWeixinService().setWxFileIndex2Dao(wxFileIndex2Dao);
+    }
+
+    /**
+     * 初始化各种联系人总方法
+     *
+     * @param weixinUser
+     */
+    public void initContacts(WeixinUser weixinUser) {
+        //初始化所有联系人，包括公众号，小程序
+        initRcontactList(weixinUser);
+        //只有我添加的朋友
+        initFriendList(weixinUser);
+    }
+
+    /**
+     * 初始化所有联系人
+     */
+    public void initRcontactList(WeixinUser weixinUser) {
         //拿到所有联系人
         List<Rcontact> rcontactList = enMicroMsgDao.getRcontactList();
         //查询头像url
         for (Rcontact rcontact : rcontactList) {
             String username = rcontact.getUsername();
-            String usernameMd5 = DigestUtils.md5Hex(username);
-            rcontact.setUsernameMd5(usernameMd5);
-
+            //设置username md5
+            rcontact.setUsernameMd5(DigestUtils.md5Hex(username));
+            //设置头像
+            ImgFlag imgFlag = enMicroMsgDao.getImgFlagByUsername(username);
+            //这个头像是有可能查不到的，比如漂流瓶，系统联系人，已删除联系人，或者应该叫冻结的
+            if (imgFlag != null) {
+                rcontact.setAlias(imgFlag.getReserved2());
+            }
         }
-        weixinUser.setRcotactList(rcontactList);
+        weixinUser.setRcontactList(rcontactList);
     }
 
     /**
-     * 初始化朋友列表
+     * 初始化朋友联系人
      */
-    public void initFriendList() {
+    public void initFriendList(WeixinUser weixinUser) {
         List<Rcontact> friendList = new ArrayList<>();
-        for (Rcontact rcontact : weixinUser.getRcotactList()) {
+        for (Rcontact rcontact : weixinUser.getRcontactList()) {
             String username = rcontact.getUsername();
+            if (rcontact.getVerifyFlag() != 0)
+                continue;
             if (username.contains("@qqim"))
                 continue;
             if (username.contains("@app"))
                 continue;
             if (username.contains("@chatroom"))
                 continue;
-//                if (username.startsWith("gh_"))
-//                    continue;
             if (rcontact.getType() == 33)
                 continue;
             if (username.equals("filehelper"))
@@ -62,8 +134,6 @@ public class WeixinService {
                 continue;
             String alias = rcontact.getAlias();
             if (StringUtils.isEmpty(username) && StringUtils.isEmpty(alias))
-                continue;
-            if (rcontact.getVerifyFlag() != 0)
                 continue;
             friendList.add(rcontact);
         }
@@ -135,4 +205,5 @@ public class WeixinService {
         WxFileIndex2 wxFileIndex2 = getMaxSizeWxFileIndex2ByMsgId(msgId);
         return new File(Constants.RESOURCE_PATH + "/" + wxFileIndex2.getPath());
     }
+
 }

@@ -1,8 +1,8 @@
-package com.eg.weixinchatlog.weixin.dao;
+package com.eg.weixinchatlog.weixin.sqlite.enmicromsg.dao;
 
-import com.eg.weixinchatlog.weixin.WeixinUser;
-import com.eg.weixinchatlog.weixin.bean.enmicromsg.Message;
-import com.eg.weixinchatlog.weixin.bean.enmicromsg.Rcontact;
+import com.eg.weixinchatlog.weixin.sqlite.enmicromsg.ImgFlag;
+import com.eg.weixinchatlog.weixin.sqlite.enmicromsg.Message;
+import com.eg.weixinchatlog.weixin.sqlite.enmicromsg.Rcontact;
 import lombok.Data;
 
 import java.io.File;
@@ -15,7 +15,6 @@ import java.util.List;
  */
 @Data
 public class EnMicroMsgDao {
-    private WeixinUser weixinUser;
     private Connection connection;
     private File dbFile;
 
@@ -115,7 +114,7 @@ public class EnMicroMsgDao {
             ResultSet resultSet = preparedStatement.executeQuery();
             List<Message> messageList = new ArrayList<>();
             while (resultSet.next()) {
-                Message message=new Message();
+                Message message = new Message();
                 message.setMsgId(resultSet.getLong("msgId"));
                 message.setMsgSvrId(resultSet.getLong("msgSvrId"));
                 message.setType(resultSet.getLong("type"));
@@ -141,6 +140,38 @@ public class EnMicroMsgDao {
             resultSet.close();
             preparedStatement.close();
             return messageList;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    /**
+     * 查找img_flag表
+     * 根据username查找
+     *
+     * @param username
+     * @return
+     */
+    public ImgFlag getImgFlagByUsername(String username) {
+        try {
+            PreparedStatement preparedStatement = connection.prepareStatement("select * from img_flag where username=?");
+            preparedStatement.setString(1, username);
+            ResultSet resultSet = preparedStatement.executeQuery();
+            if (resultSet.next() == false) {
+                return null;
+            }
+            ImgFlag imgFlag = new ImgFlag();
+            imgFlag.setUsername(resultSet.getString("username"));
+            imgFlag.setImgflag(resultSet.getLong("imgflag"));
+            imgFlag.setLastupdatetime(resultSet.getLong("lastupdatetime"));
+            imgFlag.setReserved1(resultSet.getString("reserved1"));
+            imgFlag.setReserved2(resultSet.getString("reserved2"));
+            imgFlag.setReserved3(resultSet.getLong("reserved3"));
+            imgFlag.setReserved4(resultSet.getLong("reserved4"));
+            resultSet.close();
+            preparedStatement.close();
+            return imgFlag;
         } catch (SQLException e) {
             e.printStackTrace();
         }

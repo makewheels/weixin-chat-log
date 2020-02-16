@@ -1,4 +1,4 @@
-package com.eg.weixinchatlog.weixin.bean.wxfileindex;
+package com.eg.weixinchatlog.weixin.sqlite.wxfileindex;
 
 import lombok.Data;
 

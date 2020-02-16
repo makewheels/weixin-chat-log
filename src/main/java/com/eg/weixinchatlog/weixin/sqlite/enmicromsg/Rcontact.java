@@ -1,4 +1,4 @@
-package com.eg.weixinchatlog.weixin.bean.enmicromsg;
+package com.eg.weixinchatlog.weixin.sqlite.enmicromsg;
 
 import lombok.Data;
 
