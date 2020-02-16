@@ -105,11 +105,19 @@ public class WeixinService {
             ImgFlag imgFlag = enMicroMsgDao.getImgFlagByUsername(username);
             //这个头像是有可能查不到的，比如漂流瓶，系统联系人，已删除联系人，或者应该叫冻结的
             if (imgFlag != null) {
-                rcontact.setAvatarUrl(imgFlag.getReserved2());
+                String reserved1 = imgFlag.getReserved1();
+                String reserved2 = imgFlag.getReserved2();
+                //先看第一个，如果没有再用第二个。群没有第一个，只有第二个
+                if (StringUtils.isNotEmpty(reserved1)) {
+                    rcontact.setAvatarUrl(reserved1);
+                } else if (StringUtils.isNotEmpty(reserved2)) {
+                    rcontact.setAvatarUrl(reserved2);
+                }
             }
         }
         weixinUser.setRcontactList(rcontactList);
     }
+
 
     /**
      * 初始化朋友联系人
