@@ -43,39 +43,39 @@ public class Start {
                 List<Message> messageList = weixinService.getAllMessageByTalker(username);
                 //遍历每一条消息
                 for (Message message : messageList) {
-//                    int isSend = message.getIsSend();
-//                    System.out.print("是否是发送者" + isSend + " ");
-//                    long msgId = message.getMsgId();
-//                    //判断消息类型
-//                    long type = message.getType();
-//                    if (type == MessageType.TEXT) {
-//                        System.out.println(message.getContent());
-//                    } else if (type == MessageType.IMAGE) {
-//                        System.out.print("【图片消息】 ");
-//                        File file = weixinService.getMaxSizeLocalFileByMsgId(msgId);
-//                        if (file.exists()) {
-//                            System.out.println(file.getAbsolutePath());
-//                        } else {
-//                            System.err.println("image not exist");
-//                        }
-//                    } else if (type == MessageType.VOICE) {
-//                        System.out.print("【语音消息】 " + message.getContent() + " ");
-//                        File file = weixinService.getMaxSizeLocalFileByMsgId(msgId);
-//                        if (file.exists()) {
-//                            System.out.println(file.getAbsolutePath());
-//                        } else {
-//                            System.err.println("voice not exist");
-//                        }
-//                    } else if ((type == MessageType.VIDEO)) {
-//                        System.out.print("【视频消息】 " + message.getContent() + " ");
-//                        File file = weixinService.getMaxSizeLocalFileByMsgId(msgId);
-//                        if (file.exists()) {
-//                            System.out.println(file.getAbsolutePath());
-//                        }
-//                    } else if ((type == MessageType.SYSTEM)) {
-//                        System.out.print("【系统消息】 " + message.getContent() + " ");
-//                        System.out.println(message.getContent());
-//                    }
+                    int isSend = message.getIsSend();
+                    System.out.print("是否是发送者" + isSend + " ");
+                    long msgId = message.getMsgId();
+                    //判断消息类型
+                    long type = message.getType();
+                    if (type == MessageType.TEXT) {
+                        System.out.println(message.getContent());
+                    } else if (type == MessageType.IMAGE) {
+                        System.out.print("【图片消息】 ");
+                        File file = weixinService.getMaxSizeLocalFileByMsgId(msgId);
+                        if (file != null) {
+                            System.out.println(file.getAbsolutePath());
+                        } else {
+                            System.err.println("image not exist");
+                        }
+                    } else if (type == MessageType.VOICE) {
+                        System.out.print("【语音消息】 " + message.getContent() + " ");
+                        File file = weixinService.getMaxSizeLocalFileByMsgId(msgId);
+                        if (file != null) {
+                            System.out.println(file.getAbsolutePath());
+                        } else {
+                            System.err.println("voice not exist");
+                        }
+                    } else if ((type == MessageType.VIDEO)) {
+                        System.out.print("【视频消息】 " + message.getContent() + " ");
+                        File file = weixinService.getMaxSizeLocalFileByMsgId(msgId);
+                        if (file != null) {
+                            System.out.println(file.getAbsolutePath());
+                        }
+                    } else if ((type == MessageType.SYSTEM)) {
+                        System.out.print("【系统消息】 " + message.getContent() + " ");
+                        System.out.println(message.getContent());
+                    }
                 }
                 //消息遍历结束
                 messageList.clear();

@@ -10,6 +10,7 @@ import com.eg.weixinchatlog.weixin.sqlite.wxfileindex.WxFileIndex2;
 import com.eg.weixinchatlog.weixin.sqlite.wxfileindex.dao.WxFileIndex2Dao;
 import lombok.Data;
 import org.apache.commons.codec.digest.DigestUtils;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.File;
@@ -199,6 +200,10 @@ public class WeixinService {
      */
     public WxFileIndex2 getMaxSizeWxFileIndex2ByMsgId(long msgId) {
         List<WxFileIndex2> wxFileIndex2List = wxFileIndex2Dao.getAllWxFileIndex2ByMsgId(msgId);
+        //如果没找到，返回null
+        if (CollectionUtils.isEmpty(wxFileIndex2List)) {
+            return null;
+        }
         if (wxFileIndex2List.size() == 1) {
             return wxFileIndex2List.get(0);
         }
@@ -222,9 +227,16 @@ public class WeixinService {
      * @return
      */
     public File getMaxSizeLocalFileByMsgId(long msgId) {
-        //TODO 这里应该考虑，如果本地文件不存在怎么办？
         WxFileIndex2 wxFileIndex2 = getMaxSizeWxFileIndex2ByMsgId(msgId);
-        return new File(Constants.RESOURCE_PATH + "/" + wxFileIndex2.getPath());
+        if (wxFileIndex2 == null) {
+            return null;
+        }
+        File file = new File(Constants.RESOURCE_PATH + "/" + wxFileIndex2.getPath());
+        if (file.exists() == false) {
+            return null;
+        } else {
+            return file;
+        }
     }
 
 }
