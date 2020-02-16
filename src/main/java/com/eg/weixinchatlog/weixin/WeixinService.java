@@ -105,7 +105,7 @@ public class WeixinService {
             ImgFlag imgFlag = enMicroMsgDao.getImgFlagByUsername(username);
             //这个头像是有可能查不到的，比如漂流瓶，系统联系人，已删除联系人，或者应该叫冻结的
             if (imgFlag != null) {
-                rcontact.setAlias(imgFlag.getReserved2());
+                rcontact.setAvatarUrl(imgFlag.getReserved2());
             }
         }
         weixinUser.setRcontactList(rcontactList);
