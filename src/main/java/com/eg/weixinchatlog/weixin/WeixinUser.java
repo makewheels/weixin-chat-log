@@ -23,5 +23,8 @@ public class WeixinUser {
     private WeixinService weixinService;
 
     private List<Rcontact> rcontactList;//所有联系人
-    private List<Rcontact> friendList;//经过过滤之后，
+    private List<Rcontact> friendList;  //好友
+    private List<Rcontact> chatRoomList;//群
+    private List<Rcontact> officalList; //公众号
+    private List<Rcontact> appList;     //小程序
 }

@@ -89,6 +89,12 @@ public class WeixinService {
         initRcontactList(weixinUser);
         //只有我添加的朋友
         initFriendList(weixinUser);
+        //群
+        initChatRoomList(weixinUser);
+        //公众号
+        initOfficalList(weixinUser);
+        //小程序
+        initAppList(weixinUser);
     }
 
     /**
@@ -119,9 +125,10 @@ public class WeixinService {
         //设置本地头像文件
         for (Rcontact rcontact : rcontactList) {
             String usernameMd5 = rcontact.getUsernameMd5();
-            File avatarLocalFile = new File(Constants.DATA_PATH + "/MicroMsg/"
-                    + weixinUser.getMmUinMd5() + "/avatar/" + usernameMd5.substring(0, 2) + "/"
-                    + usernameMd5.substring(2, 4) + "/user_" + usernameMd5 + ".png");
+            File avatarLocalFile = new File(weixinUser.getMmFolder() + "/avatar/"
+                    + usernameMd5.substring(0, 2) + "/" + usernameMd5.substring(2, 4)
+                    + "/user_" + usernameMd5 + ".png");
+            System.out.println(avatarLocalFile);
             //判断本地文件是否存在
             if (avatarLocalFile.exists()) {
                 rcontact.setAvatarLocalFile(avatarLocalFile);
@@ -163,6 +170,48 @@ public class WeixinService {
     }
 
     /**
+     * 初始化联系人中的群
+     */
+    public void initChatRoomList(WeixinUser weixinUser) {
+        List<Rcontact> chatRoomList = new ArrayList<>();
+        for (Rcontact rcontact : weixinUser.getRcontactList()) {
+            String username = rcontact.getUsername();
+            if (username.endsWith("@chatroom")) {
+                chatRoomList.add(rcontact);
+            }
+        }
+        weixinUser.setChatRoomList(chatRoomList);
+    }
+
+    /**
+     * 初始化联系人中的公众号
+     */
+    public void initOfficalList(WeixinUser weixinUser) {
+        List<Rcontact> chatRoomList = new ArrayList<>();
+        for (Rcontact rcontact : weixinUser.getRcontactList()) {
+            String username = rcontact.getUsername();
+            if (username.startsWith("gh_") && username.endsWith("@app") == false) {
+                chatRoomList.add(rcontact);
+            }
+        }
+        weixinUser.setOfficalList(chatRoomList);
+    }
+
+    /**
+     * 初始化联系人中的小程序
+     */
+    public void initAppList(WeixinUser weixinUser) {
+        List<Rcontact> chatRoomList = new ArrayList<>();
+        for (Rcontact rcontact : weixinUser.getRcontactList()) {
+            String username = rcontact.getUsername();
+            if (username.startsWith("gh_") && username.endsWith("@app")) {
+                chatRoomList.add(rcontact);
+            }
+        }
+        weixinUser.setAppList(chatRoomList);
+    }
+
+    /**
      * 据talker获取，与改联系人的聊天记录总数
      *
      * @param username
@@ -199,7 +248,7 @@ public class WeixinService {
      * @return
      */
     public WxFileIndex2 getMaxSizeWxFileIndex2ByMsgId(long msgId) {
-        List<WxFileIndex2> wxFileIndex2List = wxFileIndex2Dao.getAllWxFileIndex2ByMsgId(msgId);
+        List<WxFileIndex2> wxFileIndex2List = getAllWxFileIndex2ByMsgId(msgId);
         //如果没找到，返回null
         if (CollectionUtils.isEmpty(wxFileIndex2List)) {
             return null;

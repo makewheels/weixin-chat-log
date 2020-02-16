@@ -31,7 +31,7 @@ public class Start {
                 String username = friend.getUsername();
                 String avatarUrl = friend.getAvatarUrl();
                 if (avatarUrl != null) {
-//                    System.out.println(avatarUrl);
+                    System.out.println(avatarUrl);
                 }
                 long messageCount = weixinService.getMessageCountByTalker(username);
                 if (messageCount == 0) {
