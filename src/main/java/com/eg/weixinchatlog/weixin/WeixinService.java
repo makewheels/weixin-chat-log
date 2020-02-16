@@ -4,10 +4,12 @@ import com.eg.weixinchatlog.util.Constants;
 import com.eg.weixinchatlog.weixin.bean.enmicromsg.Message;
 import com.eg.weixinchatlog.weixin.bean.enmicromsg.Rcontact;
 import com.eg.weixinchatlog.weixin.bean.wxfileindex.WxFileIndex2;
+import com.eg.weixinchatlog.weixin.dao.EnMicroMsgDao;
+import com.eg.weixinchatlog.weixin.dao.WxFileIndex2Dao;
 import lombok.Data;
+import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang3.StringUtils;
 
-import java.io.Console;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
@@ -25,7 +27,15 @@ public class WeixinService {
      * 初始化联系人列表
      */
     public void initRcontactList() {
+        //拿到所有联系人
         List<Rcontact> rcontactList = enMicroMsgDao.getRcontactList();
+        //查询头像url
+        for (Rcontact rcontact : rcontactList) {
+            String username = rcontact.getUsername();
+            String usernameMd5 = DigestUtils.md5Hex(username);
+            rcontact.setUsernameMd5(usernameMd5);
+
+        }
         weixinUser.setRcotactList(rcontactList);
     }
 

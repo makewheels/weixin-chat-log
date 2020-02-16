@@ -27,4 +27,8 @@ public class Rcontact {
     private String openImAppid;
     private String descWordingId;
     private String sourceExtInfo;
+
+    //从这开始是我自己添加的字段
+    private String avatarUrl;//头像url
+    private String usernameMd5;
 }

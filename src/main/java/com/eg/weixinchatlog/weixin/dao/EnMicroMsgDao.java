@@ -1,5 +1,6 @@
-package com.eg.weixinchatlog.weixin;
+package com.eg.weixinchatlog.weixin.dao;
 
+import com.eg.weixinchatlog.weixin.WeixinUser;
 import com.eg.weixinchatlog.weixin.bean.enmicromsg.Message;
 import com.eg.weixinchatlog.weixin.bean.enmicromsg.Rcontact;
 import lombok.Data;

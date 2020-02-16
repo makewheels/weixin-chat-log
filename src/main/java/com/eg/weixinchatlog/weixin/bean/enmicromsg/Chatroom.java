@@ -9,19 +9,19 @@ public class Chatroom {
     private String memberlist;
     private String displayname;
     private String chatroomnick;
-    private int roomflag;
+    private long roomflag;
     private String roomowner;
     private byte[] roomdata;
-    private int isShowname;
+    private long isShowname;
     private String selfDisplayName;
-    private int style;
-    private int chatroomdataflag;
+    private long style;
+    private long chatroomdataflag;
     private String modifytime;
     private long chatroomnotice;
-    private int chatroomVersion;
+    private long chatroomVersion;
     private String chatroomnoticeEditor;
     private long chatroomnoticePublishTime;
     private long chatroomLocalVersion;
-    private int memberCount;
-    private int chatroomStatus;
+    private long memberCount;
+    private long chatroomStatus;
 }

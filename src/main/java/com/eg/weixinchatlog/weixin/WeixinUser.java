@@ -1,6 +1,8 @@
 package com.eg.weixinchatlog.weixin;
 
 import com.eg.weixinchatlog.weixin.bean.enmicromsg.Rcontact;
+import com.eg.weixinchatlog.weixin.dao.EnMicroMsgDao;
+import com.eg.weixinchatlog.weixin.dao.WxFileIndex2Dao;
 import lombok.Data;
 
 import java.io.File;
