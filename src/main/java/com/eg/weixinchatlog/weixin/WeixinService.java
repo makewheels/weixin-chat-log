@@ -5,8 +5,8 @@ import com.eg.weixinchatlog.util.WeixinUtil;
 import com.eg.weixinchatlog.weixin.sqlite.enmicromsg.ImgFlag;
 import com.eg.weixinchatlog.weixin.sqlite.enmicromsg.Message;
 import com.eg.weixinchatlog.weixin.sqlite.enmicromsg.Rcontact;
-import com.eg.weixinchatlog.weixin.sqlite.wxfileindex.WxFileIndex2;
 import com.eg.weixinchatlog.weixin.sqlite.enmicromsg.dao.EnMicroMsgDao;
+import com.eg.weixinchatlog.weixin.sqlite.wxfileindex.WxFileIndex2;
 import com.eg.weixinchatlog.weixin.sqlite.wxfileindex.dao.WxFileIndex2Dao;
 import lombok.Data;
 import org.apache.commons.codec.digest.DigestUtils;
@@ -113,6 +113,19 @@ public class WeixinService {
                 } else if (StringUtils.isNotEmpty(reserved2)) {
                     rcontact.setAvatarUrl(reserved2);
                 }
+            }
+        }
+        //设置本地头像文件
+        for (Rcontact rcontact : rcontactList) {
+            String usernameMd5 = rcontact.getUsernameMd5();
+            File avatarLocalFile = new File(Constants.DATA_PATH + "/MicroMsg/"
+                    + weixinUser.getMmUinMd5() + "/avatar/" + usernameMd5.substring(0, 2) + "/"
+                    + usernameMd5.substring(2, 4) + "/user_" + usernameMd5 + ".png");
+            //判断本地文件是否存在
+            if (avatarLocalFile.exists()) {
+                rcontact.setAvatarLocalFile(avatarLocalFile);
+            } else {
+                rcontact.setAvatarLocalFile(null);
             }
         }
         weixinUser.setRcontactList(rcontactList);

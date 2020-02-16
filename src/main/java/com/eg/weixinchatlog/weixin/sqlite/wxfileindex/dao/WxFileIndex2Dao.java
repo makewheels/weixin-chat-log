@@ -1,7 +1,5 @@
 package com.eg.weixinchatlog.weixin.sqlite.wxfileindex.dao;
 
-import com.eg.weixinchatlog.weixin.WeixinUser;
-import com.eg.weixinchatlog.weixin.sqlite.enmicromsg.ImgFlag;
 import com.eg.weixinchatlog.weixin.sqlite.wxfileindex.WxFileIndex2;
 import lombok.Data;
 

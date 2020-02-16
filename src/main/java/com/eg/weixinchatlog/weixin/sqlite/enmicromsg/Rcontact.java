@@ -2,6 +2,8 @@ package com.eg.weixinchatlog.weixin.sqlite.enmicromsg;
 
 import lombok.Data;
 
+import java.io.File;
+
 @Data
 public class Rcontact {
     private String username;
@@ -29,6 +31,7 @@ public class Rcontact {
     private String sourceExtInfo;
 
     //从这开始是我自己添加的字段
-    private String avatarUrl;//头像url
     private String usernameMd5;
+    private String avatarUrl;//头像url
+    private File avatarLocalFile;//头像本地文件
 }

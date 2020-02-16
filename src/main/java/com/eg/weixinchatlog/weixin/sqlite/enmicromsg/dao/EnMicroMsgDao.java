@@ -41,11 +41,23 @@ public class EnMicroMsgDao {
      */
     public List<Rcontact> getRcontactList() {
         List<Rcontact> rcontactList = new ArrayList<>();
+
+        PreparedStatement preparedStatement = null;
+        ResultSet resultSet = null;
         try {
-            PreparedStatement preparedStatement = connection.prepareStatement("select * from rcontact");
-            ResultSet resultSet = preparedStatement.executeQuery();
-            while (resultSet.next()) {
-                Rcontact rcontact = new Rcontact();
+            preparedStatement = connection.prepareStatement("select * from rcontact");
+            resultSet = preparedStatement.executeQuery();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        while (true) {
+            try {
+                if (!resultSet.next()) break;
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+            Rcontact rcontact = new Rcontact();
+            try {
                 rcontact.setUsername(resultSet.getString("username"));
                 rcontact.setAlias(resultSet.getString("alias"));
                 rcontact.setConRemark(resultSet.getString("conRemark"));
@@ -65,17 +77,32 @@ public class EnMicroMsgDao {
                 rcontact.setChatroomFlag(resultSet.getInt("chatroomFlag"));
                 rcontact.setDeleteFlag(resultSet.getInt("deleteFlag"));
                 rcontact.setContactLabelIds(resultSet.getString("contactLabelIds"));
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+            try {
                 rcontact.setTicket(resultSet.getString("ticket"));
+            } catch (SQLException e) {
+            }
+            try {
                 rcontact.setOpenImAppid(resultSet.getString("openImAppid"));
                 rcontact.setDescWordingId(resultSet.getString("descWordingId"));
-                rcontact.setSourceExtInfo(resultSet.getString("sourceExtInfo"));
-                rcontactList.add(rcontact);
+            } catch (SQLException e) {
+                e.printStackTrace();
             }
+            try {
+                rcontact.setSourceExtInfo(resultSet.getString("sourceExtInfo"));
+            } catch (SQLException e) {
+            }
+            rcontactList.add(rcontact);
+        }
+        try {
             resultSet.close();
             preparedStatement.close();
         } catch (SQLException e) {
             e.printStackTrace();
         }
+
         return rcontactList;
     }
 
